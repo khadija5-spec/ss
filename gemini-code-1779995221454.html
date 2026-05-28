@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BNIMTIR GARD - System</title>
+    <style>
+        body { font-family: sans-serif; background-color: #121212; color: white; margin: 0; text-align: center; }
+        
+        /* Brand Colors */
+        .brand { background: #eeeeee; padding: 10px 20px; border-radius: 12px; display: inline-block; margin: 15px 0; border: 2px solid #f1c40f; }
+        .bnimtir { color: #000000; font-weight: 900; }
+        .gard { color: #e74c3c; font-weight: 900; }
+
+        /* Login Page */
+        #login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
+        .login-box { background: #222; padding: 30px; border-radius: 15px; border: 1px solid #444; width: 85%; max-width: 350px; }
+        
+        select, input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: none; font-size: 1.1em; text-align: center; box-sizing: border-box; }
+        .btn-main { background: #f1c40f; color: black; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1em; }
+
+        /* Main App */
+        #main-app { display: none; }
+        .header { background: #222; padding: 10px; border-bottom: 4px solid #f1c40f; position: sticky; top: 0; z-index: 100; }
+        #clock { font-size: 3em; font-weight: bold; color: #f1c40f; line-height: 1; }
+        .user-tag { color: #2ecc71; font-weight: bold; font-size: 0.9em; display: block; margin-top: 5px; }
+
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .btn { padding: 25px 5px; font-size: 1.2em; border: none; border-radius: 15px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
+        .btn:active { transform: scale(0.95); }
+        
+        .btn-entry { background-color: #2ecc71; } 
+        .btn-exit { background-color: #e74c3c; }
+        .btn-visitor { background-color: #3498db; }
+        .btn-glovo { background-color: #ffc244; color: #000; }
+        .btn-alert { background-color: #e67e22; grid-column: span 2; padding: 20px; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: #222; padding: 20px; border-radius: 15px; width: 85%; border: 1px solid #f1c40f; }
+
+        /* Wake Check */
+        #wake-check { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(192, 57, 43, 0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .wake-box { background: white; color: black; padding: 40px; border-radius: 20px; width: 80%; }
+        .wake-btn { background: #27ae60; color: white; padding: 20px; font-size: 1.5em; border: none; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 20px; font-weight: bold; }
+
+        /* Logs Section */
+        .log-section-title { font-weight: bold; margin: 15px 0 5px 0; font-size: 1.1em; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .log-container { margin: 0 15px 20px 15px; background: #1e1e1e; padding: 10px; border-radius: 10px; text-align: right; border: 1px solid #333; max-height: 350px; overflow-y: auto; }
+        .log-entry { border-bottom: 1px solid #2a2a2a; padding: 10px 0; font-size: 0.9em; }
+        .time { color: #f1c40f; font-family: monospace; margin-left: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- Popup Yaqada -->
+    <div id="wake-check">
+        <div class="wake-box">
+            <h2 style="margin:0">⚠️ تنبيه اليقظة</h2>
+            <p>اضغط لتأكيد حضورك</p>
+            <button class="wake-btn" onclick="confirmWake()">أنا مستيقظ ✅</button>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login-page">
+        <div class="login-box">
+            <div class="brand" style="font-size: 1.8em;">
+                <span class="bnimtir">BNIMTIR</span> <span class="gard">GARD</span>
+            </div>
+            <select id="user-select">
+                <option value="AHMED">AHMED</option>
+                <option value="HICHAM">HICHAM</option>
+                <option value="ABDELKADER">ABDELKADER</option>
+                <option value="ABDELAZIZ">ABDELAZIZ</option>
+                <option value="HASSAN">HASSAN</option>
+            </select>
+            <input type="password" id="pass-input" placeholder="الكود السري">
+            <button class="btn-main" onclick="doLogin()">تسجيل الدخول</button>
+        </div>
+    </div>
+
+    <!-- App Main -->
+    <div id="main-app">
+        <div class="header">
+            <div class="brand" style="font-size: 1.2em; padding: 5px 15px; margin-bottom: 10px;">
+                <span class="bnimtir">BNIMTIR</span> <span class="gard">GARD</span>
+            </div>
+            <div id="clock">00:00:00</div>
+            <span id="active-user" class="user-tag">---</span>
+        </div>
+
+        <div class="button-grid">
+            <button class="btn btn-entry" onclick="openModal('دخول سيارة')">🚗 دخول</button>
+            <button class="btn btn-exit" onclick="openModal('خروج سيارة')">🏎️ خروج</button>
+            <button class="btn btn-visitor" onclick="openModal('زائر')">👤 زائر</button>
+            <button class="btn btn-glovo" onclick="openGlovoModal()">🛵 GLOVO</button>
+            <button class="btn btn-alert" onclick="openModal('تبليغ')">⚠️ تبليغ</button>
+        </div>
+
+        <div class="log-section-title">
+            <span style="color:#f1c40f">●</span> سجل التحركات اليومي
+        </div>
+        <div class="log-container"><div id="activity-log"></div></div>
+    </div>
+
+    <!-- Modal General -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3 id="m-title"></h3>
+            <input type="text" id="note-input" placeholder="رقم السيارة أو ملاحظة...">
+            <button class="btn-main" onclick="saveAction()">حفظ البيانات</button>
+        </div>
+    </div>
+
+    <!-- Modal GLOVO -->
+    <div id="glovo-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#ffc244">تفاصيل GLOVO 🛵</h3>
+            <input type="number" id="glovo-floor" placeholder="رقم الطابق (Etage)">
+            <input type="number" id="glovo-app" placeholder="رقم الشقة (Appartement)">
+            <button class="btn-main" onclick="saveGlovo()">تسجيل الطلبية</button>
+        </div>
+    </div>
+
+    <script>
+        const passDB = {"AHMED":"11", "HICHAM":"22", "ABDELKADER":"33", "ABDELAZIZ":"44", "HASSAN":"55"};
+        let user = "";
+        let currentAction = "";
+
+        function doLogin() {
+            const u = document.getElementById('user-select').value;
+            const p = document.getElementById('pass-input').value;
+            if (passDB[u] === p) {
+                user = u;
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                document.getElementById('active-user').innerText = "المراقب الحالي: " + user;
+                startSystem();
+            } else { alert("الكود السري غير صحيح!"); }
+        }
+
+        function startSystem() {
+            // Clock
+            setInterval(() => {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString('fr-FR');
+            }, 1000);
+
+            // Wake check every 30 mins
+            setInterval(() => {
+                document.getElementById('wake-check').style.display = 'flex';
+                const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                audio.play();
+            }, 1800000);
+        }
+
+        function openModal(a) {
+            currentAction = a;
+            document.getElementById('m-title').innerText = a;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function openGlovoModal() {
+            document.getElementById('glovo-modal').style.display = 'flex';
+        }
+
+        function saveGlovo() {
+            const f = document.getElementById('glovo-floor').value;
+            const a = document.getElementById('glovo-app').value;
+            if(f && a) {
+                addLog(`🛵 GLOVO: طابق ${f} / شقة ${a}`);
+                closeModals();
+            } else { alert("يرجى ملء جميع الخانات!"); }
+        }
+
+        function saveAction() {
+            const note = document.getElementById('note-input').value;
+            addLog(currentAction + (note ? " - " + note : ""));
+            closeModals();
+        }
+
+        function confirmWake() {
+            addLog("✅ إثبات اليقظة");
+            document.getElementById('wake-check').style.display = 'none';
+        }
+
+        function closeModals() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('glovo-modal').style.display = 'none';
+            document.getElementById('note-input').value = "";
+            document.getElementById('glovo-floor').value = "";
+            document.getElementById('glovo-app').value = "";
+        }
+
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString('fr-FR');
+            const logBox = document.getElementById('activity-log');
+            const row = document.createElement('div');
+            row.className = 'log-entry';
+            row.innerHTML = `<span class="time">${time}</span> <b>${user}</b>: ${msg}`;
+            logBox.insertBefore(row, logBox.firstChild);
+        }
+    </script>
+</body>
+</html>
